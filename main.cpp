@@ -8,11 +8,6 @@ int main(int argc, char* argv[])
 
     application.setWindowIcon(QIcon(":/icon.svg"));
 
-    QFile style_sheet(":/style.qss");
-    style_sheet.open(QFile::ReadOnly);
-    application.setStyleSheet(style_sheet.readAll());
-    style_sheet.close();
-
     MainWindow main_window;
     main_window.show();
 
