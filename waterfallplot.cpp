@@ -10,23 +10,20 @@ WaterfallPlot::WaterfallPlot(QWidget* parent) :
 {
     QPainter painter;
     painter.begin(&m_waterfall);
+
     painter.fillRect(m_waterfall.rect(), QBrush(Qt::GlobalColor::black));
 
     QLinearGradient gradient;
-    gradient.setStart(m_waterfall.rect().left(), m_waterfall.rect().top());
-    gradient.setFinalStop(m_waterfall.rect().right(), m_waterfall.rect().top());
+    gradient.setStart(0, 0);
+    gradient.setFinalStop(m_waterfall.rect().width(), 0);
     gradient.setColorAt(0, Qt::GlobalColor::red);
     gradient.setColorAt(1, Qt::GlobalColor::blue);
 
+    painter.setPen(QPen(Qt::PenStyle::NoPen));
     painter.setBrush(gradient);
-    painter.drawRect(m_waterfall.rect().left(), m_waterfall.rect().top(), m_waterfall.rect().width(), m_waterfall.rect().height() / 10);
+    painter.drawRect(0, 0, m_waterfall.rect().width(), m_waterfall.rect().height() / 10);
 
     painter.end();
-}
-
-void WaterfallPlot::resizeEvent(QResizeEvent* event)
-{
-    m_waterfall = m_waterfall.scaled(event->size());
 }
 
 void WaterfallPlot::paintEvent(QPaintEvent* event)
@@ -35,6 +32,6 @@ void WaterfallPlot::paintEvent(QPaintEvent* event)
 
     QPainter painter;
     painter.begin(this);
-    painter.drawPixmap(0, 0, m_waterfall);
+    painter.drawPixmap(0, 0, width(), height(), m_waterfall);
     painter.end();
 }

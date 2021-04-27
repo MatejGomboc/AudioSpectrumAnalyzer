@@ -11,7 +11,6 @@ public:
     explicit WaterfallPlot(QWidget* parent = nullptr);
 
 private:
-    void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
     QPixmap m_waterfall;
