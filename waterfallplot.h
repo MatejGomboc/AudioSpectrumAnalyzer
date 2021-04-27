@@ -1,8 +1,7 @@
 #ifndef WATERFALLPLOT_H
 #define WATERFALLPLOT_H
 
-#include <QGridLayout>
-#include <QGraphicsView>
+#include <QWidget>
 
 class WaterfallPlot : public QWidget
 {
@@ -11,12 +10,11 @@ class WaterfallPlot : public QWidget
 public:
     explicit WaterfallPlot(QWidget* parent = nullptr);
 
-protected:
-    void resizeEvent(QResizeEvent* event) override;
-
 private:
-    QGridLayout* m_central_grid_layout = new QGridLayout(this);
-    QGraphicsView* m_graphics_view = new QGraphicsView(this);
+    void resizeEvent(QResizeEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
+
+    QPixmap m_waterfall;
 };
 
 #endif // WATERFALLPLOT_H

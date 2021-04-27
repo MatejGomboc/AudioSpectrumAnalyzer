@@ -1,22 +1,40 @@
 #include "waterfallplot.h"
+#include <QPainter>
+#include <QResizeEvent>
+#include <QPaintEvent>
+
 
 WaterfallPlot::WaterfallPlot(QWidget* parent) :
-    QWidget(parent)
+    QWidget(parent),
+    m_waterfall(width(), height())
 {
-    m_central_grid_layout->addWidget(m_graphics_view);
-    m_central_grid_layout->setContentsMargins(0, 0, 0, 0);
-
-    m_graphics_view->setScene(new QGraphicsScene(m_graphics_view->rect(), this));
-    m_graphics_view->setAlignment(Qt::AlignmentFlag::AlignTop | Qt::AlignmentFlag::AlignLeft);
+    QPainter painter;
+    painter.begin(&m_waterfall);
+    painter.fillRect(m_waterfall.rect(), QBrush(Qt::GlobalColor::black));
 
     QLinearGradient gradient;
-    gradient.setStart(0, 0);
-    gradient.setFinalStop(m_graphics_view->scene()->width(), 0);
+    gradient.setStart(m_waterfall.rect().left(), m_waterfall.rect().top());
+    gradient.setFinalStop(m_waterfall.rect().right(), m_waterfall.rect().top());
     gradient.setColorAt(0, Qt::GlobalColor::red);
     gradient.setColorAt(1, Qt::GlobalColor::blue);
-    m_graphics_view->scene()->addRect(0, 0, m_graphics_view->scene()->width(), m_graphics_view->scene()->height(), QPen(Qt::PenStyle::NoPen), gradient);
+
+    painter.setBrush(gradient);
+    painter.drawRect(m_waterfall.rect().left(), m_waterfall.rect().top(), m_waterfall.rect().width(), m_waterfall.rect().height() / 10);
+
+    painter.end();
 }
 
 void WaterfallPlot::resizeEvent(QResizeEvent* event)
 {
+    m_waterfall = m_waterfall.scaled(event->size());
+}
+
+void WaterfallPlot::paintEvent(QPaintEvent* event)
+{
+    Q_UNUSED(event)
+
+    QPainter painter;
+    painter.begin(this);
+    painter.drawPixmap(0, 0, m_waterfall);
+    painter.end();
 }
