@@ -21,6 +21,8 @@ add_executable(audio_spectrum_analyzer
     waterfallplot.cpp
     waterfallplot.h
     resources.qrc
+    spectrumanalyzer.cpp
+    spectrumanalyzer.h
 )
 
 target_link_libraries(audio_spectrum_analyzer PRIVATE
