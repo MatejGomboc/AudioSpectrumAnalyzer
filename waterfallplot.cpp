@@ -22,8 +22,10 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
     QPainter painter;
     painter.begin(&m_waterfall);
 
-    qreal interval_width = m_waterfall.rect().width() / (count - 1);
-    int strip_thickness = m_waterfall.rect().height() / scroll_fraction;
+    painter.fillRect(m_waterfall.rect(), QBrush(Qt::GlobalColor::black));
+
+    qreal interval_width = static_cast<qreal>(m_waterfall.rect().width()) / (count - 1);
+    int strip_thickness = m_waterfall.rect().height() * scroll_fraction;
 
     for (size_t i = 0; i < count - 1; i++) {
         QLinearGradient gradient;
