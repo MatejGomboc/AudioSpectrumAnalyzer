@@ -12,6 +12,20 @@ MainWindow::MainWindow(QWidget* parent) :
     showMaximized();
 
     QVector<qreal> spectrum;
+
+    spectrum.clear();
+    for (size_t i = 0; i < 10024; i++) {
+        spectrum.push_back(static_cast<qreal>(i) / 10023.0);
+    }
+    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
+
+    spectrum.clear();
+    for (size_t i = 0; i < 1024; i++) {
+        spectrum.push_back(static_cast<qreal>(i) / 1023.0);
+    }
+    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
+
+    spectrum.clear();
     for (size_t i = 0; i < 1000; i++) {
         spectrum.push_back(static_cast<qreal>(i) / 999.0);
     }

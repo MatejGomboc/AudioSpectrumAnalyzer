@@ -21,6 +21,10 @@ WaterfallPlot::WaterfallPlot(QWidget* parent) :
 
 void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fraction)
 {
+    if (count == 0) {
+        return;
+    }
+
     QElapsedTimer timer;
     timer.start();
 
@@ -35,6 +39,13 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
         QColor color = getColorFromValue(data[0]);
         painter.setBrush(QBrush(color, Qt::SolidPattern));
         painter.drawRect(0, 0, m_waterfall.rect().width(), strip_thickness);
+
+    } else if (count == m_waterfall.rect().width() + 1) {
+        for (size_t i = 0; i < count; i++) {
+            QColor color = getColorFromValue(data[i]);
+            painter.setPen(QPen(color));
+            painter.drawLine(i, 0, i, strip_thickness);
+        }
 
     } else if (count > m_waterfall.rect().width() + 1) {
         QVector<qreal> values(m_waterfall.rect().width() + 1, 0.0);
@@ -52,33 +63,18 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
         }
 
     } else {
+        int interval_start = 0;
+        QColor color = getColorFromValue(data[0]);
         for (size_t i = 0; i < count - 1; i++) {
-            int interval_start = (m_waterfall.rect().width() * i) / (count - 1);
             int interval_end = (m_waterfall.rect().width() * (i + 1)) / (count - 1);
             int interval_width = interval_end - interval_start;
-
-            QColor color_start = getColorFromValue(data[i]);
-            QColor color_end = getColorFromValue(data[i + 1]);
-
-            if (interval_width == 1) {
-                painter.setPen(QPen(color_start));
-                painter.drawLine(interval_start, 0, interval_start, strip_thickness);
-                if (i == count - 2) {
-                    painter.setPen(QPen(color_end));
-                    painter.drawLine(interval_end, 0, interval_end, strip_thickness);
-                }
-            } else {
-                QLinearGradient gradient;
-                gradient.setStart(interval_start, 0);
-                gradient.setFinalStop(interval_end, 0);
-
-                gradient.setColorAt(0, color_start);
-                gradient.setColorAt(1, color_end);
-
-                painter.setPen(QPen(Qt::PenStyle::NoPen));
-                painter.setBrush(gradient);
-                painter.drawRect(interval_start, 0, interval_width, strip_thickness);
+            qreal slope = (data[i + 1] - data[i]) / interval_width;
+            for (size_t j = 0; j < interval_width; j++) {
+                painter.setPen(QPen(color));
+                painter.drawLine(interval_start + j, 0, interval_start + j, strip_thickness);
+                color = getColorFromValue(slope * j + data[i]);
             }
+            interval_start = interval_end;
         }
     }
 
