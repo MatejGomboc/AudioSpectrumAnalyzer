@@ -21,10 +21,6 @@ WaterfallPlot::WaterfallPlot(QWidget* parent) :
 
 void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fraction)
 {
-    if (count < 1) {
-        return;
-    }
-
     QElapsedTimer timer;
     timer.start();
 
