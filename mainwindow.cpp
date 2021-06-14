@@ -34,8 +34,8 @@ MainWindow::MainWindow(QWidget* parent) :
     m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
 
     spectrum.clear();
-    for (size_t i = 0; i < 2000; i++) {
-        spectrum.push_back(static_cast<qreal>(i) / 1999.0);
+    for (size_t i = 0; i < 4096; i++) {
+        spectrum.push_back(static_cast<qreal>(i) / 4095.0);
     }
     m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
 }

@@ -5,7 +5,7 @@
 
 WaterfallPlot::WaterfallPlot(QWidget* parent) :
     QWidget(parent),
-    m_waterfall(width(), height())
+    m_waterfall(1024, 1024)
 {
     QElapsedTimer timer;
     timer.start();
@@ -34,13 +34,29 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
     QPainter painter;
     painter.begin(&m_waterfall);
 
-    painter.setPen(QPen(Qt::PenStyle::NoPen));
-
     if (count == 1) {
+        painter.setPen(QPen(Qt::PenStyle::NoPen));
         QColor color = getColorFromValue(data[0]);
         painter.setBrush(QBrush(color, Qt::SolidPattern));
         painter.drawRect(0, 0, m_waterfall.rect().width(), strip_thickness);
+
+    } else if (count > m_waterfall.rect().width()) {
+        QVector<qreal> values(m_waterfall.rect().width(), 0.0);
+        QVector<int> nums(m_waterfall.rect().width(), 0);
+        for (size_t i = 0; i < count; i++) {
+            int pixel_idx = ((m_waterfall.rect().width() - 1) * i) / (count - 1);
+            values[pixel_idx] += data[i];
+            nums[pixel_idx]++;
+        }
+        for (size_t i = 0; i < m_waterfall.rect().width(); i++) {
+            qreal average = values[i] / nums[i];
+            QColor color = getColorFromValue(average);
+            painter.setPen(QPen(color));
+            painter.drawLine(i, 0, i, strip_thickness);
+        }
+
     } else {
+        painter.setPen(QPen(Qt::PenStyle::NoPen));
         for (size_t i = 0; i < count - 1; i++) {
             int interval_start = (m_waterfall.rect().width() * i) / (count - 1);
             int interval_end = (m_waterfall.rect().width() * (i + 1)) / (count - 1);
@@ -68,24 +84,6 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
     qDebug() << "addData, time(ms):" << time_ms;
 }
 
-void WaterfallPlot::resizeEvent(QResizeEvent* event)
-{
-    Q_UNUSED(event)
-
-    QElapsedTimer timer;
-    timer.start();
-
-    QPixmap waterfall_scaled(event->size());
-    QPainter painter;
-    painter.begin(&waterfall_scaled);
-    painter.drawPixmap(0, 0, waterfall_scaled.width(), waterfall_scaled.height(), m_waterfall);
-    painter.end();
-    m_waterfall = waterfall_scaled;
-
-    quint64 time_ms = timer.elapsed();
-    qDebug() << "resizeEvent, size:" << event->size() << ", time(ms):" << time_ms;
-}
-
 void WaterfallPlot::paintEvent(QPaintEvent* event)
 {
     QElapsedTimer timer;
@@ -93,7 +91,7 @@ void WaterfallPlot::paintEvent(QPaintEvent* event)
 
     QPainter painter;
     painter.begin(this);
-    painter.drawPixmap(0, 0, rect().width(), height(), m_waterfall);
+    painter.drawPixmap(0, 0, width(), height(), m_waterfall);
     painter.end();
 
     quint64 time_ms = timer.elapsed();
