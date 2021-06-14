@@ -19,18 +19,18 @@ MainWindow::MainWindow(QWidget* parent) :
 
     spectrum.clear();
     for (size_t i = 0; i < 100; i++) {
-        spectrum.push_back(static_cast<qreal>(i) * 0.5 / 99.0);
+        spectrum.push_back(static_cast<qreal>(i) / 99.0);
     }
     m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
 
     spectrum.clear();
     for (size_t i = 0; i < 10; i++) {
-        spectrum.push_back(static_cast<qreal>(i) * 0.8 / 9.0);
+        spectrum.push_back(static_cast<qreal>(i) / 9.0);
     }
     m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
 
     spectrum.clear();
-    spectrum.push_back(0.5);
+    spectrum.push_back(1.0);
     m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
 
     spectrum.clear();

@@ -36,15 +36,15 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
         painter.setBrush(QBrush(color, Qt::SolidPattern));
         painter.drawRect(0, 0, m_waterfall.rect().width(), strip_thickness);
 
-    } else if (count > m_waterfall.rect().width()) {
-        QVector<qreal> values(m_waterfall.rect().width(), 0.0);
-        QVector<int> nums(m_waterfall.rect().width(), 0);
+    } else if (count > m_waterfall.rect().width() + 1) {
+        QVector<qreal> values(m_waterfall.rect().width() + 1, 0.0);
+        QVector<int> nums(m_waterfall.rect().width() + 1, 0);
         for (size_t i = 0; i < count; i++) {
-            int pixel_idx = ((m_waterfall.rect().width() - 1) * i) / (count - 1);
+            int pixel_idx = (m_waterfall.rect().width() * i) / (count - 1);
             values[pixel_idx] += data[i];
             nums[pixel_idx]++;
         }
-        for (size_t i = 0; i < m_waterfall.rect().width(); i++) {
+        for (size_t i = 0; i < m_waterfall.rect().width() + 1; i++) {
             qreal average = values[i] / nums[i];
             QColor color = getColorFromValue(average);
             painter.setPen(QPen(color));
@@ -52,24 +52,33 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
         }
 
     } else {
-        painter.setPen(QPen(Qt::PenStyle::NoPen));
         for (size_t i = 0; i < count - 1; i++) {
             int interval_start = (m_waterfall.rect().width() * i) / (count - 1);
             int interval_end = (m_waterfall.rect().width() * (i + 1)) / (count - 1);
             int interval_width = interval_end - interval_start;
 
-            QLinearGradient gradient;
-            gradient.setStart(interval_start, 0);
-            gradient.setFinalStop(interval_end, 0);
-
             QColor color_start = getColorFromValue(data[i]);
             QColor color_end = getColorFromValue(data[i + 1]);
-            gradient.setColorAt(0, color_start);
-            gradient.setColorAt(1, color_end);
 
-            painter.setBrush(gradient);
+            if (interval_width == 1) {
+                painter.setPen(QPen(color_start));
+                painter.drawLine(interval_start, 0, interval_start, strip_thickness);
+                if (i == count - 2) {
+                    painter.setPen(QPen(color_end));
+                    painter.drawLine(interval_end, 0, interval_end, strip_thickness);
+                }
+            } else {
+                QLinearGradient gradient;
+                gradient.setStart(interval_start, 0);
+                gradient.setFinalStop(interval_end, 0);
 
-            painter.drawRect(interval_start, 0, interval_width, strip_thickness);
+                gradient.setColorAt(0, color_start);
+                gradient.setColorAt(1, color_end);
+
+                painter.setPen(QPen(Qt::PenStyle::NoPen));
+                painter.setBrush(gradient);
+                painter.drawRect(interval_start, 0, interval_width, strip_thickness);
+            }
         }
     }
 
