@@ -3,7 +3,7 @@
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent)
 {
-    resize(800, 600);
+    resize(1024, 1024);
     showMaximized();
 
     setMenuBar(m_menu_bar);
@@ -12,6 +12,9 @@ MainWindow::MainWindow(QWidget* parent) :
 
     m_central_grid_layout->addWidget(m_waterfall_plot);
 
-    std::vector<qreal> spectrum(255, 0.5);
-    m_waterfall_plot->addData(spectrum.data(), 255, 0.2);
+    QVector<qreal> spectrum;
+    for (size_t i = 0; i < 1024; i++) {
+        spectrum.push_back(static_cast<qreal>(i) / 1023.0);
+    }
+    m_waterfall_plot->addData(spectrum.data(), spectrum.size());
 }

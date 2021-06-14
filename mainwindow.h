@@ -20,4 +20,5 @@ private:
     QGridLayout* m_central_grid_layout = new QGridLayout(m_central_widget);
     WaterfallPlot* m_waterfall_plot = new WaterfallPlot(m_central_widget);
 };
+
 #endif // MAINWINDOW_H

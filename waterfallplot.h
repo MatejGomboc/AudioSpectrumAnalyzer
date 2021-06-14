@@ -9,7 +9,7 @@ class WaterfallPlot : public QWidget
 
 public:
     explicit WaterfallPlot(QWidget* parent = nullptr);
-    void addData(const qreal data[], size_t count, qreal scroll_fraction);
+    void addData(const qreal data[], size_t count);
 
 private:
     void paintEvent(QPaintEvent* event) override;

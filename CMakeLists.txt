@@ -12,7 +12,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt6 COMPONENTS REQUIRED
+    Core
+    Gui
+    Widgets
+)
 
 add_executable(audio_spectrum_analyzer
     main.cpp
@@ -21,8 +25,6 @@ add_executable(audio_spectrum_analyzer
     waterfallplot.cpp
     waterfallplot.h
     resources.qrc
-    spectrumanalyzer.cpp
-    spectrumanalyzer.h
 )
 
 target_link_libraries(audio_spectrum_analyzer PRIVATE
