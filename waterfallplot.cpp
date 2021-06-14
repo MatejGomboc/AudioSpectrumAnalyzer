@@ -48,18 +48,25 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
         }
 
     } else if (count > m_waterfall.rect().width() + 1) {
-        QVector<qreal> values(m_waterfall.rect().width() + 1, 0.0);
-        QVector<int> nums(m_waterfall.rect().width() + 1, 0);
-        for (size_t i = 0; i < count; i++) {
-            int pixel_idx = (m_waterfall.rect().width() * i) / (count - 1);
-            values[pixel_idx] += data[i];
-            nums[pixel_idx]++;
-        }
-        for (size_t i = 0; i < m_waterfall.rect().width() + 1; i++) {
-            qreal average = values[i] / nums[i];
+        int pixel_idx = 0;
+        qreal value = data[0];
+        size_t num = 1;
+        for (size_t i = 1; i < count; i++) {
+            int pixel_idx_next = (m_waterfall.rect().width() * i) / (count - 1);
+            if (pixel_idx_next == pixel_idx) {
+                value += data[i];
+                num++;
+                if (i < count - 1) {
+                    continue;
+                }
+            }
+            qreal average = value / num;
             QColor color = getColorFromValue(average);
             painter.setPen(QPen(color));
-            painter.drawLine(i, 0, i, strip_thickness);
+            painter.drawLine(pixel_idx, 0, pixel_idx, strip_thickness);
+            pixel_idx = pixel_idx_next;
+            value = data[i];
+            num = 1;
         }
 
     } else {
