@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QRandomGenerator>
 
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent)
@@ -9,47 +10,38 @@ MainWindow::MainWindow(QWidget* parent) :
 
     m_central_grid_layout->addWidget(m_waterfall_plot);
 
+    QAction* start_action = m_menu_bar->addAction("Start");
+    connect(start_action, &QAction::triggered, this, &MainWindow::OnStartKlicked, Qt::ConnectionType::QueuedConnection);
+
+    QAction* stop_action = m_menu_bar->addAction("Stop");
+    connect(stop_action, &QAction::triggered, this, &MainWindow::OnStopKlicked, Qt::ConnectionType::QueuedConnection);
+
+    m_test_timer->setSingleShot(false);
+    m_test_timer->setInterval(30);
+
+    setMinimumWidth(800);
+    setMinimumHeight(600);
+
     showMaximized();
+}
 
-    QVector<qreal> spectrum;
+void MainWindow::OnStartKlicked()
+{
+    connect(m_test_timer, &QTimer::timeout, this, &MainWindow::OnTimerTimeout, Qt::ConnectionType::QueuedConnection);
+    m_test_timer->start();
+}
 
-    spectrum.clear();
-    for (size_t i = 0; i < 10024; i++) {
-        spectrum.push_back(static_cast<qreal>(i) / 10023.0);
+void MainWindow::OnStopKlicked()
+{
+    m_test_timer->stop();
+    disconnect(m_test_timer, &QTimer::timeout, this, &MainWindow::OnTimerTimeout);
+}
+
+void MainWindow::OnTimerTimeout()
+{
+    QVector<qreal> data(36864);
+    for (size_t i = 0; i < data.size(); i++) {
+        data[i] = QRandomGenerator::global()->generateDouble();
     }
-    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
-
-    spectrum.clear();
-    for (size_t i = 0; i < 1024; i++) {
-        spectrum.push_back(static_cast<qreal>(i) / 1023.0);
-    }
-    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
-
-    spectrum.clear();
-    for (size_t i = 0; i < 1000; i++) {
-        spectrum.push_back(static_cast<qreal>(i) / 999.0);
-    }
-    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
-
-    spectrum.clear();
-    for (size_t i = 0; i < 100; i++) {
-        spectrum.push_back(static_cast<qreal>(i) / 99.0);
-    }
-    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
-
-    spectrum.clear();
-    for (size_t i = 0; i < 10; i++) {
-        spectrum.push_back(static_cast<qreal>(i) / 9.0);
-    }
-    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
-
-    spectrum.clear();
-    spectrum.push_back(1.0);
-    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
-
-    spectrum.clear();
-    for (size_t i = 0; i < 4096; i++) {
-        spectrum.push_back(static_cast<qreal>(i) / 4095.0);
-    }
-    m_waterfall_plot->addData(spectrum.data(), spectrum.size(), 0.1);
+    m_waterfall_plot->addData(data.data(), data.size(), 0.005);
 }
