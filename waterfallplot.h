@@ -15,7 +15,7 @@ private:
     void paintEvent(QPaintEvent* event) override;
     QColor getColorFromValue(qreal value);
 
-    QPixmap m_waterfall;
+    QImage m_waterfall;
 };
 
 #endif // WATERFALLPLOT_H

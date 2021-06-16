@@ -39,7 +39,7 @@ void MainWindow::OnStopKlicked()
 
 void MainWindow::OnTimerTimeout()
 {
-    QVector<qreal> data(36864);
+    QVector<qreal> data(2048);
     for (size_t i = 0; i < data.size(); i++) {
         data[i] = QRandomGenerator::global()->generateDouble();
     }

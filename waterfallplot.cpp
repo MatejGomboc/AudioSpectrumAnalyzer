@@ -4,19 +4,8 @@
 #include <QElapsedTimer>
 
 WaterfallPlot::WaterfallPlot(QWidget* parent) :
-    QWidget(parent),
-    m_waterfall(1024, 1024)
+    QWidget(parent)
 {
-    QElapsedTimer timer;
-    timer.start();
-
-    QPainter painter;
-    painter.begin(&m_waterfall);
-    painter.fillRect(m_waterfall.rect(), QBrush(Qt::GlobalColor::black));
-    painter.end();
-
-    quint64 time_ms = timer.elapsed();
-    qDebug() << "WaterfallPlot, time(ms):" << time_ms;
 }
 
 void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fraction)
@@ -28,64 +17,29 @@ void WaterfallPlot::addData(const qreal data[], size_t count, qreal scroll_fract
     QElapsedTimer timer;
     timer.start();
 
-    int strip_thickness = m_waterfall.rect().height() * scroll_fraction;
-    m_waterfall.scroll(0, strip_thickness, m_waterfall.rect());
+    if (m_waterfall.isNull()) {
+        m_waterfall = QImage(count, 2048, QImage::Format::Format_ARGB32);
+        m_waterfall.fill(Qt::GlobalColor::black);
+        qDebug() << "new";
+    }
+
+    if (count != m_waterfall.width()) {
+        m_waterfall = m_waterfall.scaledToWidth(count);
+        qDebug() << "resized";
+    }
+
+    QImage waterfall_crop = m_waterfall.copy(0, 0, m_waterfall.width(), m_waterfall.height() - 1);
 
     QPainter painter;
     painter.begin(&m_waterfall);
+    painter.drawImage(0, 1, waterfall_crop);
+    painter.end();
 
-    if (count == 1) {
-        painter.setPen(QPen(Qt::PenStyle::NoPen));
-        QColor color = getColorFromValue(data[0]);
-        painter.setBrush(QBrush(color, Qt::SolidPattern));
-        painter.drawRect(0, 0, m_waterfall.rect().width(), strip_thickness);
-
-    } else if (count == m_waterfall.rect().width() + 1) {
-        for (size_t i = 0; i < count; i++) {
-            QColor color = getColorFromValue(data[i]);
-            painter.setPen(QPen(color));
-            painter.drawLine(i, 0, i, strip_thickness);
-        }
-
-    } else if (count > m_waterfall.rect().width() + 1) {
-        int pixel_idx = 0;
-        qreal value = data[0];
-        size_t num = 1;
-        for (size_t i = 1; i < count; i++) {
-            int pixel_idx_next = (m_waterfall.rect().width() * i) / (count - 1);
-            if (pixel_idx_next == pixel_idx) {
-                value += data[i];
-                num++;
-                if (i < count - 1) {
-                    continue;
-                }
-            }
-            qreal average = value / num;
-            QColor color = getColorFromValue(average);
-            painter.setPen(QPen(color));
-            painter.drawLine(pixel_idx, 0, pixel_idx, strip_thickness);
-            pixel_idx = pixel_idx_next;
-            value = data[i];
-            num = 1;
-        }
-
-    } else {
-        int interval_start = 0;
-        QColor color = getColorFromValue(data[0]);
-        for (size_t i = 0; i < count - 1; i++) {
-            int interval_end = (m_waterfall.rect().width() * (i + 1)) / (count - 1);
-            int interval_width = interval_end - interval_start;
-            qreal slope = (data[i + 1] - data[i]) / interval_width;
-            for (size_t j = 0; j < interval_width; j++) {
-                painter.setPen(QPen(color));
-                painter.drawLine(interval_start + j, 0, interval_start + j, strip_thickness);
-                color = getColorFromValue(slope * j + data[i]);
-            }
-            interval_start = interval_end;
-        }
+    for (size_t i = 0; i < count; i++) {
+        QColor color = getColorFromValue(data[i]);
+        m_waterfall.setPixelColor(i, 0, color);
     }
 
-    painter.end();
     update();
 
     quint64 time_ms = timer.elapsed();
@@ -99,11 +53,11 @@ void WaterfallPlot::paintEvent(QPaintEvent* event)
 
     QPainter painter;
     painter.begin(this);
-    painter.drawPixmap(0, 0, width(), height(), m_waterfall);
+    painter.drawImage(0, 0, m_waterfall, 0, 0, width(), height());
     painter.end();
 
     quint64 time_ms = timer.elapsed();
-    qDebug() << "paintEvent, rect:" << event->rect() << ", time(ms):" << time_ms;
+    qDebug() << "paintEvent, time(ms):" << time_ms;
 }
 
 QColor WaterfallPlot::getColorFromValue(qreal value)
@@ -114,5 +68,5 @@ QColor WaterfallPlot::getColorFromValue(qreal value)
         value = 1;
     }
 
-    return QColor::fromHsvF(value, 1.0, 1.0, 1.0);
+    return QColor::fromHsvF(value, 1.0, 1.0);
 }
